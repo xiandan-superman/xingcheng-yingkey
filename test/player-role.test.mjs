@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {promises as fs} from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createEngine} from '../src/core/engine.mjs';
+test('standalone viewer has no issuer key or management methods and accepts merchant license',async t=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'videokey-viewer-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
+ const opts={seal:b=>Buffer.from(b),unseal:b=>Buffer.from(b)};
+ const merchant=await createEngine({...opts,storageDir:path.join(root,'merchant'),deviceId:'merchant'});t.after(()=>merchant.close());
+ const playerOpts={...opts,storageDir:path.join(root,'viewer'),deviceId:'viewer',role:'player'};
+ const player=await createEngine(playerOpts);t.after(()=>player.close());
+ assert.equal(player.encryptVideo,undefined);assert.equal(player.issueLicense,undefined);assert.equal(player.revokeLicense,undefined);
+ const stored=JSON.parse(await fs.readFile(path.join(root,'viewer','state.json')));assert.equal(stored.issuerPrivateKey,undefined);assert.equal(stored.issuerPublicKey,undefined);
+ const input=path.join(root,'own.mp4'),output=path.join(root,'own.vdrm');await fs.writeFile(input,'own video bytes');
+ const v=await merchant.encryptVideo({inputPath:input,outputPath:output,courseId:'test',title:'sample'});
+ const l=await merchant.issueLicense({deviceRequest:player.getDeviceRequest(),videoIds:[v.videoId],expiresAt:null,maxPlays:1});
+ const id=await player.importLicense(l),s=await player.openPlayback({filePath:output,licenseId:id});assert.equal((await player.readPlayback({sessionId:s.sessionId})).toString(),'own video bytes');
+ await player.close();const restarted=await createEngine(playerOpts);t.after(()=>restarted.close());await assert.rejects(restarted.openPlayback({filePath:output,licenseId:id}),/次数/);
+ await assert.rejects(createEngine({...playerOpts,role:'manager'}),/不能混用/);
+});

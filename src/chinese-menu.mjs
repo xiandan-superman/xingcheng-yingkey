@@ -1,0 +1,2 @@
+import {Menu} from 'electron';
+export function installChineseMenu(){Menu.setApplicationMenu(Menu.buildFromTemplate([{label:'文件',submenu:[{label:'关闭窗口',role:'close'},{label:'退出',role:'quit'}]},{label:'编辑',submenu:[{label:'撤销',role:'undo'},{label:'重做',role:'redo'},{type:'separator'},{label:'剪切',role:'cut'},{label:'复制',role:'copy'},{label:'粘贴',role:'paste'},{label:'全选',role:'selectAll'}]},{label:'窗口',submenu:[{label:'最小化',role:'minimize'},{label:'全屏',role:'togglefullscreen'}]}]));}

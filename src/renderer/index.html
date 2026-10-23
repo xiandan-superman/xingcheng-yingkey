@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' http://127.0.0.1:*; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>星橙·映钥</title>
+  <link rel="stylesheet" href="../ui/visual.css"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="星橙·映钥首页"><span class="brand-icon"><img src="../../assets/brand.png" alt=""></span><span>星橙·映钥<span class="brand-en">星橙·映钥 · 0.9.0</span></span></a>
+      <div class="workspace-label">本地工作空间 <span class="status-dot"></span></div>
+      <nav aria-label="主导航">
+        <button data-page="overview"><span class="nav-icon" data-icon="grid"></span>概览</button>
+        <button data-page="encrypt"><span class="nav-icon" data-icon="lock"></span>加密工作台</button>
+        <button data-page="groups"><span class="nav-icon" data-icon="folder"></span>课程分组</button><button data-page="licenses"><span class="nav-icon" data-icon="key"></span>授权管理</button>
+      </nav>
+      <div class="sidebar-bottom"><div class="local-mark"><span class="status-dot"></span> 本机加密与授权</div><p>视频保存在本机。<br>授权由你管理。</p><span class="version">星橙·映钥 · 0.9.0</span></div>
+    </aside>
+    <div class="main-shell">
+      <header class="topbar"><span id="breadcrumb">工作空间 / 概览</span><div class="topbar-right"><span class="privacy-mark"><span data-icon="shield"></span> 本地处理</span><button class="icon-button" id="refresh" title="刷新工作空间" aria-label="刷新工作空间" data-icon="refresh"></button></div></header>
+      <main id="main" tabindex="-1"></main>
+      <footer class="app-footer"><span>星橙·映钥 · 视频保护工作空间</span><span>设备许可 · 动态水印 · 本机防护</span></footer>
+    </div>
+  </div>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <script src="../ui/gsap.min.js"></script><script src="../ui/ui-motion.js"></script><script src="app.js"></script><script src="library.js"></script>
+</body>
+</html>

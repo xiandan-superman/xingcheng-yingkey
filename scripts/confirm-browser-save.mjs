@@ -1,0 +1,2 @@
+import {promises as fs} from 'node:fs';
+export async function confirmBrowserSave(run,file){const bytes=await fs.readFile(file);await run(`(()=>{const d=new DataTransfer();d.items.add(new File([Uint8Array.from(atob(${JSON.stringify(bytes.toString('base64'))}),c=>c.charCodeAt(0))],'saved.vdrm'));const input=document.querySelector('#web-confirm-saved');input.files=d.files;input.dispatchEvent(new Event('change'));})()`);}
