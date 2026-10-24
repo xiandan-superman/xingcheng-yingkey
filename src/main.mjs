@@ -12,6 +12,10 @@ import {createEngine} from './core/engine.mjs';
 import {createMediaServer} from './media-server.mjs';
 import {createManagerAccess} from './manager-access.mjs';
 import {createWorkLog} from './work-log.mjs';
+import {desktopFetch} from './desktop-network.mjs';
+import {configureOnlineTransport} from './core/online.mjs';
+import {completeAccountLogin} from './native-account-login.mjs';
+import {randomUUID} from 'node:crypto';
 import {createOnlineAdmin} from './online-admin.mjs';
 import {runEncryptionBatch} from './batch-encryption.mjs';
 import {installChineseMenu} from './chinese-menu.mjs';
@@ -54,7 +58,7 @@ async function readJson(filters){
 }
 function register(name,fn){ipcMain.handle('videokey:'+name,async(event,...args)=>{
   const fromWork=event.sender===win?.webContents&&event.senderFrame===win?.webContents.mainFrame&&event.senderFrame.url===uiUrl,fromLogin=event.sender===loginWin?.webContents&&event.senderFrame===loginWin?.webContents.mainFrame&&event.senderFrame.url===loginUrl;if(!fromWork&&!(fromLogin&&['getLoginState','loginEmployeeSso','cancelEmployeeSso'].includes(name)))throw Error('拒绝来自未知页面的请求');
-  try{if(fromWork&&['loginEmployeeSso','cancelEmployeeSso'].includes(name))throw Error('请在登录窗口完成登录');if(fromLogin&&name==='loginEmployeeSso'&&win?.isVisible()&&managerAccess.state.authenticated)return managerAccess.identity;if(name==='loginEmployeeSso'&&loginAbort)throw Error('正在登录，请稍候');if(employeeSwitchBusy&&!['getDashboard','getLoginState','openOnlineConsole','cancelEmployeeSso'].includes(name))throw Error('请先完成浏览器中的统一登录，或等待本次登录超时');if(name==='loginEmployee'||name==='connectOnline')throw Error('新版管理端只支持量子星橙统一账号登录，不能用旧账号或全局连接文件绕过登录。');if(!['getDashboard','getLoginState','loginEmployeeSso','cancelEmployeeSso','logoutEmployee','openOnlineConsole','getEvidence','cancelBatch','closePlayback','getSessionStatus'].includes(name))await managerAccess.require();return await fn(...args);}catch(e){throw Error(e?.message||'操作失败');}
+  try{if(fromWork&&['loginEmployeeSso','cancelEmployeeSso'].includes(name))throw Error('请在登录窗口完成登录');if(fromLogin&&name==='loginEmployeeSso'&&win?.isVisible()&&managerAccess.state.authenticated)return managerAccess.identity;if(name==='loginEmployeeSso'&&loginAbort)throw Error('正在登录，请稍候');if(employeeSwitchBusy&&!['getDashboard','getLoginState','openOnlineConsole','cancelEmployeeSso'].includes(name))throw Error('请先完成登录或取消本次登录');if(name==='loginEmployee'||name==='connectOnline')throw Error('新版管理端只支持量子星橙统一账号登录，不能用旧账号或全局连接文件绕过登录。');if(!['getDashboard','getLoginState','loginEmployeeSso','cancelEmployeeSso','logoutEmployee','openOnlineConsole','getEvidence','cancelBatch','closePlayback','getSessionStatus'].includes(name))await managerAccess.require();return await fn(...args);}catch(e){throw Error(e?.message||'操作失败');}
 });}
 
 async function encryptManaged(data,outputPath,onProgress,signal){
@@ -86,7 +90,7 @@ async function uploadRecordsCore(data){
 
 async function showLoginWindow(){
  if(shuttingDown)return;win?.hide();if(loginOpening)return loginOpening;if(loginWin&&!loginWin.isDestroyed()){loginWin.webContents.send('videokey:login-state',{...managerAccess.state,checking:checkingLogin});loginWin.show();loginWin.focus();return;}
- loginOpening=(async()=>{const window=new BrowserWindow({width:460,height:520,resizable:false,maximizable:false,show:false,backgroundColor:'#ffffff',title:'登录 · 星橙·映钥',icon:path.resolve(here,'../assets/brand.png'),webPreferences:{preload:path.join(here,'renderer','login-preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,devTools:!app.isPackaged}});loginWin=window;window.removeMenu();window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',(event,url)=>{if(url!==loginUrl)event.preventDefault();});window.on('closed',()=>{if(loginWin===window)loginWin=null;if(!window.__loginTransitionClose&&!shuttingDown&&!managerAccess.state.authenticated){loginAbort?.abort();app.quit();}});await window.loadFile(path.join(here,'renderer','login.html'));if(!shuttingDown&&!window.isDestroyed()){window.show();window.focus();}})();try{return await loginOpening;}finally{loginOpening=null;}
+ loginOpening=(async()=>{const window=new BrowserWindow({width:440,height:620,resizable:false,maximizable:false,show:false,backgroundColor:'#ffffff',title:'登录 · 星橙·映钥',icon:path.resolve(here,'../assets/brand.png'),webPreferences:{preload:path.join(here,'renderer','login-preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,devTools:!app.isPackaged}});loginWin=window;window.removeMenu();window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',(event,url)=>{if(url!==loginUrl)event.preventDefault();});window.on('closed',()=>{if(loginWin===window)loginWin=null;if(!window.__loginTransitionClose&&!shuttingDown&&!managerAccess.state.authenticated){loginAbort?.abort();app.quit();}});await window.loadFile(path.join(here,'renderer','login.html'));if(!shuttingDown&&!window.isDestroyed()){window.show();window.focus();}})();try{return await loginOpening;}finally{loginOpening=null;}
 }
 async function showWorkspaceWindow(){
  if(shuttingDown)return;if(workspaceOpening)return workspaceOpening;
@@ -102,6 +106,7 @@ async function showWorkspaceWindow(){
 }
 
 async function initialize(){
+  configureOnlineTransport(desktopFetch(session.defaultSession));
   if(!safeStorage.isEncryptionAvailable())throw Error('Windows 安全存储不可用，无法保存本机密钥');
   const seal=data=>safeStorage.encryptString(Buffer.from(data).toString('base64'));
   const unseal=data=>Buffer.from(safeStorage.decryptString(Buffer.from(data)),'base64');
@@ -118,7 +123,7 @@ async function initialize(){
   register('getLoginState',()=>({...managerAccess.state,checking:checkingLogin}));
   register('cancelEmployeeSso',()=>{loginAbort?.abort();return {cancelled:true};});
   register('connectOnline',async()=>{const cfg=await readJson([{name:'星橙·映钥服务连接',extensions:['yingserver']}]);if(!cfg)return null;return onlineAdmin.connect(cfg);});
-  register('loginEmployeeSso',async data=>{if(encryptionBusy||issueBusy||uploadBusy)throw Error('任务处理中，请稍候再切换员工');employeeSwitchBusy=true;loginAbort=new AbortController();try{await onlineAdmin.loginEmployeeSso({url:'https://video-auth.qstarorange.com',signal:loginAbort.signal,openBrowser:url=>shell.openExternal(url)});await managerAccess.require();loginAbort.signal.throwIfAborted();employeeSwitchBusy=false;await showWorkspaceWindow();return managerAccess.identity;}catch(error){if(loginAbort.signal.aborted){await onlineAdmin.logoutEmployee();managerAccess.clear();throw Error('已取消统一登录');}throw error;}finally{employeeSwitchBusy=false;loginAbort=null;}});
+  register('loginEmployeeSso',async data=>{if(encryptionBusy||issueBusy||uploadBusy)throw Error('任务处理中，请稍候再切换员工');employeeSwitchBusy=true;loginAbort=new AbortController();try{await onlineAdmin.loginEmployeeSso({url:'https://video-auth.qstarorange.com',signal:loginAbort.signal,openBrowser:async url=>{const accountSession=session.fromPartition('yingkey-login-'+randomUUID(),{cache:false});try{await completeAccountLogin({loginUrl:url,username:data?.username,password:data?.password,newPassword:data?.newPassword,signal:loginAbort.signal,fetch:desktopFetch(accountSession)});}finally{if(data){data.password='';data.newPassword='';}await accountSession.clearStorageData();accountSession.closeAllConnections();}}});await managerAccess.require();loginAbort.signal.throwIfAborted();employeeSwitchBusy=false;await showWorkspaceWindow();return managerAccess.identity;}catch(error){if(loginAbort.signal.aborted){await onlineAdmin.logoutEmployee();managerAccess.clear();throw Error('已取消统一登录');}throw error;}finally{employeeSwitchBusy=false;loginAbort=null;}});
   register('loginEmployee',async data=>{if(encryptionBusy||issueBusy||uploadBusy)throw Error('任务处理中，请稍候再切换员工');return onlineAdmin.loginEmployee(data);});
   register('logoutEmployee',async()=>{if(encryptionBusy||issueBusy||uploadBusy)throw Error('任务处理中，请稍候再退出');await workLog.sync();await onlineAdmin.logoutEmployee();managerAccess.clear();await showLoginWindow();});
   register('syncWorkTasks',async()=>{await workLog.sync();return normalized();});

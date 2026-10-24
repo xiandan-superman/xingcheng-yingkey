@@ -13,11 +13,21 @@
     <img class="brand" src="../../assets/brand.png" alt="" width="56" height="56">
     <h1>星橙·映钥</h1>
     <p class="subtitle">视频加密与授权</p>
-    <div class="controls">
-      <button id="sign-in" type="button" disabled>登录</button>
+    <form class="controls" id="login-form">
+      <label for="username">账号</label>
+      <input id="username" name="username" autocomplete="username" maxlength="128" required placeholder="量子星橙账号">
+      <label for="password">密码</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" maxlength="1024" required placeholder="请输入密码">
+      <div id="password-change" hidden>
+        <label for="new-password">新密码</label>
+        <input id="new-password" type="password" autocomplete="new-password" minlength="10" maxlength="128" placeholder="10至128个字符">
+        <label for="confirm-password">确认新密码</label>
+        <input id="confirm-password" type="password" autocomplete="new-password" maxlength="128" placeholder="再次输入新密码">
+      </div>
+      <button id="sign-in" type="submit" disabled>登录</button>
       <p id="status" role="status" aria-live="polite">正在确认登录…</p>
       <button id="cancel" class="cancel" type="button" hidden>取消</button>
-    </div>
+    </form>
   </main>
 </body>
 </html>

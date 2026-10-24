@@ -1,4 +1,7 @@
 import {createHash,randomUUID,verify,createPublicKey} from 'node:crypto';
+let transport=(...args)=>fetch(...args);
+export function configureOnlineTransport(value){if(typeof value!=='function')throw Error('Network transport required');transport=value;}
+export const onlineFetch=(...args)=>transport(...args);
 export const canonical=x=>JSON.stringify(x,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 export const licenseHash=l=>createHash('sha256').update(canonical({payload:l.payload,signature:l.signature,issuerPublicKey:l.issuerPublicKey})).digest('hex');
 export function onlineConfig(x){
@@ -9,7 +12,7 @@ export function onlineConfig(x){
  if(createPublicKey(x.publicKey).asymmetricKeyType!=='ed25519')throw Error('授权服务公钥无效');
  return {url:u.origin,publicKey:x.publicKey};
 }
-export async function postJson(url,body,token){const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json',...(token?{authorization:'Bearer '+token}:{})},body:JSON.stringify(body),signal:AbortSignal.timeout(5000),redirect:'error'});if(r.status>=500||r.status===429){const e=Error('授权服务器暂时不可达，请检查网络');e.networkUnavailable=true;await r.body?.cancel();throw e;}const s=await r.text();if(s.length>1048576)throw Error('授权服务器响应过大');let j;try{j=JSON.parse(s);}catch{throw Error('授权服务器响应无效');}if(!r.ok)throw Error(j.error||'授权服务器拒绝请求');return j;}
+export async function postJson(url,body,token){const r=await onlineFetch(url,{method:'POST',headers:{'content-type':'application/json',...(token?{authorization:'Bearer '+token}:{})},body:JSON.stringify(body),signal:AbortSignal.timeout(5000),redirect:'error'});if(r.status>=500||r.status===429){const e=Error('授权服务器暂时不可达，请检查网络');e.networkUnavailable=true;await r.body?.cancel();throw e;}const s=await r.text();if(s.length>1048576)throw Error('授权服务器响应过大');let j;try{j=JSON.parse(s);}catch{throw Error('授权服务器响应无效');}if(!r.ok)throw Error(j.error||'授权服务器拒绝请求');return j;}
 export async function requestLease({license,videoId,sessionId=null,proof,fetchLease=postJson,attemptId}){
  const cfg=onlineConfig(license.payload.online),nonce=randomUUID();const body={licenseId:license.payload.id,licenseHash:licenseHash(license),deviceId:license.payload.deviceId,videoId,sessionId,nonce,...(attemptId?{attemptId}:{})};body.proof=await proof(canonical(body));
  let reply;try{reply=await fetchLease(cfg.url+'/v1/lease',body);}catch(e){if(e.name==='TimeoutError'||e.name==='AbortError'||e instanceof TypeError){e.networkUnavailable=true;}throw e;}

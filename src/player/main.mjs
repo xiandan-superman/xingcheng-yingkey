@@ -5,6 +5,8 @@ import os from 'node:os';
 import {promises as fs} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
+import {desktopFetch} from '../desktop-network.mjs';
+import {configureOnlineTransport} from '../core/online.mjs';
 import {createEngine} from '../core/engine.mjs';
 import {createMediaServer} from '../media-server.mjs';
 import {createLocalGuard} from '../local-guard.mjs';
@@ -21,6 +23,7 @@ function machine(){let id=os.hostname();try{const value=execFileSync(path.join(p
 function state(){const d=engine.getDashboard();return {deviceId:d.deviceId,captureProtection:win?.isContentProtected()||false,licenses:d.licenses.map(l=>({id:l.payload.id,videoIds:l.payload.videos.map(v=>v.videoId),courseNames:[...new Set(l.payload.videos.map(v=>v.courseId))].join('、'),maxPlays:l.payload.maxPlays,playsUsed:l.playsUsed,expiresAt:l.payload.expiresAt,revoked:l.revoked,online:Boolean(l.payload.online),policy:playbackPolicy(l.payload.policy,l.payload.policy==null),legacy:l.payload.version<2}))};}
 function handle(name,fn){ipcMain.handle('viewer:'+name,async(event,...args)=>{if(event.sender!==win?.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==uiUrl)throw Error('请求来源无效');return fn(...args);});}
 async function init(){
+ configureOnlineTransport(desktopFetch(session.defaultSession));
  if(!safeStorage.isEncryptionAvailable())throw Error('Windows 安全存储不可用');
  const storageDir=path.join(app.getPath('userData'),'vault'),seal=b=>safeStorage.encryptString(Buffer.from(b).toString('base64')),unseal=b=>Buffer.from(safeStorage.decryptString(Buffer.from(b)),'base64');
  const anchor=createLocalGuard({storageDir,anchorRoot:path.join(process.env.LOCALAPPDATA||app.getPath('appData'),'StarOrangeYingKey','anchors'),seal,unseal});

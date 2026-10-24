@@ -2,7 +2,7 @@
 
 面向公司员工的视频加密、设备授权与专用播放系统，包含 Windows 管理端、独立播放器和网页授权后台。
 
-**桌面版本：v0.10.4 · 授权服务版本：v0.10.2**
+**桌面版本：v0.10.5 · 授权服务版本：v0.10.2**
 
 ## 下载
 
@@ -10,11 +10,11 @@ Windows 10/11，64 位。请下载完整角色包后解压，保留整个程序�
 
 | 使用角色 | 下载 | 内容 |
 |---|---|---|
-| 公司加密与授权员工 | [视频加密使用方](https://github.com/xiandan-superman/xingcheng-yingkey/releases/download/v0.10.4/yingkey-v0.10.4-encryptor-win-x64.zip) | 管理端与操作指南 |
-| 学员或观看者 | [观看方](https://github.com/xiandan-superman/xingcheng-yingkey/releases/download/v0.10.4/yingkey-v0.10.4-viewer-win-x64.zip) | 独立播放器与观看指南 |
-| 产品设计、开发与维护人员 | [产品设计方](https://github.com/xiandan-superman/xingcheng-yingkey/releases/download/v0.10.4/yingkey-v0.10.4-designer-win-x64.zip) | 源码、无业务数据的服务材料、Node 运行时、界面预览与说明 |
+| 公司加密与授权员工 | [视频加密使用方](https://github.com/xiandan-superman/xingcheng-yingkey/releases/download/v0.10.5/yingkey-v0.10.5-encryptor-win-x64.zip) | 管理端与操作指南 |
+| 学员或观看者 | [观看方](https://github.com/xiandan-superman/xingcheng-yingkey/releases/download/v0.10.5/yingkey-v0.10.5-viewer-win-x64.zip) | 独立播放器与观看指南 |
+| 产品设计、开发与维护人员 | [产品设计方](https://github.com/xiandan-superman/xingcheng-yingkey/releases/download/v0.10.5/yingkey-v0.10.5-designer-win-x64.zip) | 源码、无业务数据的服务材料、Node 运行时、界面预览与说明 |
 
-[完整发布页](https://github.com/xiandan-superman/xingcheng-yingkey/releases/tag/v0.10.4) · [SHA-256 校验文件](https://github.com/xiandan-superman/xingcheng-yingkey/releases/download/v0.10.4/SHA256SUMS.txt) · [更新记录](CHANGELOG.md)
+[完整发布页](https://github.com/xiandan-superman/xingcheng-yingkey/releases/tag/v0.10.5) · [SHA-256 校验文件](https://github.com/xiandan-superman/xingcheng-yingkey/releases/download/v0.10.5/SHA256SUMS.txt) · [更新记录](CHANGELOG.md)
 
 GitHub 自动生成的 Source code 是源码，不是可直接运行的桌面程序。普通使用者请选择上面的角色包。升级前先关闭旧版，避免新旧程序同时写入同一份本机数据。
 
@@ -22,13 +22,13 @@ GitHub 自动生成的 Source code 是源码，不是可直接运行的桌面程
 
 ## 登录与公司协作
 
-管理端启动时验证已保存的员工登录；没有有效登录时，仅显示独立登录窗口。点击“登录”，在系统浏览器完成量子星橙账号验证后，才打开工作台。退出或登录失效后返回独立登录窗口。
+管理端启动时验证已保存的员工登录；没有有效登录时，仅显示独立登录窗口。输入量子星橙账号与密码，点击“登录”后进入工作台，无需打开浏览器。退出或登录失效后返回独立登录窗口。
 
 ![独立登录窗口](docs/screenshots/独立登录窗口.png)
 
 管理员在[量子星橙账号中心](https://account.qstarorange.com/)分配映钥平台访问：平台管理员拥有业务管理权限；普通成员需要 `operate` 操作权限才能使用管理端。只读成员在网页查看记录。账号中心管理员身份不会自动授予其他平台权限。
 
-管理端不能使用旧账号或全局连接文件跳过登录，每次新业务操作都会验证身份与权限。密码仅在账号中心输入。停用、撤权或无法在线验证时，不允许开始新的业务操作；已有文件、密钥与历史记录保留。
+管理端不能使用旧账号或全局连接文件跳过登录，每次新业务操作都会验证身份与权限。密码只发送到账号中心，不保存到本机。停用、撤权或无法在线验证时，不允许开始新的业务操作；已有文件、密钥与历史记录保留。
 
 同一家公司共享业务资料，员工可查看本人或公司记录。桌面只显示该电脑的本机资料，网页汇总已同步记录，不自动传输视频文件。旧记录人员未知时保持未知，不按同名账号自动合并；统一账号改名后仍按稳定身份编号记录归属。
 
@@ -74,7 +74,7 @@ npm run package
 
 ## 验证与边界
 
-104 项自动测试通过。实际管理端安装包已验证独立窗口、键盘焦点、200% 缩放、登录取消、真实统一登录、加密、退出锁定、权限撤销及数据保留。播放器已完成实际计次、暂停继续、到期和远程停用回归；本版未修改其业务协议。
+109 项自动测试通过。实际管理端安装包已验证独立窗口、键盘焦点、200% 缩放、登录取消、真实统一登录、加密、退出锁定、权限撤销及数据保留。播放器已完成实际计次、暂停继续、到期和远程停用回归；本版未修改其业务协议。
 
 - 在线播放约 20 秒复查，自最后成功验证起断网宽限最多 90 秒；服务需持续在线。
 - 许可绑定设备及签发时的视频清单；已分发的离线许可不能远程收回。
