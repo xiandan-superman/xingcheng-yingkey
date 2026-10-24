@@ -1,7 +1,7 @@
 {
   "name": "starorange-yingkey-manager",
   "productName": "星橙·映钥",
-  "version": "0.9.0",
+  "version": "0.10.4",
   "description": "星橙·映钥：视频加密与设备授权",
   "private": true,
   "type": "module",

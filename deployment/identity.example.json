@@ -1,0 +1,7 @@
+{
+  "enabled": false,
+  "issuer": "https://account.qstarorange.com",
+  "baseUrl": "https://account.qstarorange.com",
+  "clientId": "yingkey",
+  "clientSecret": "REPLACE_ON_SERVER_WITH_REGISTERED_CLIENT_SECRET"
+}

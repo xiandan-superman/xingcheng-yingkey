@@ -1,0 +1,23 @@
+:root{color-scheme:light;font-family:"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",sans-serif;color:#243041;background:#fff;font-synthesis:none}
+*{box-sizing:border-box}
+body{margin:0;min-width:180px;min-height:100vh;display:grid;place-items:center}
+.login{width:min(300px,calc(100% - 56px));padding:44px 0;text-align:center}
+.brand{display:block;margin:0 auto 22px;object-fit:contain}
+h1{margin:0;font-size:27px;line-height:1.4;font-weight:650}
+.subtitle{margin:8px 0 0;color:#596779;font-size:14px;line-height:1.5}
+.controls{margin-top:42px}
+button{font:inherit;cursor:pointer;border:1px solid transparent;border-radius:8px;min-height:44px;transition:background-color 120ms ease}
+#sign-in{width:100%;padding:11px 20px;background:#b54708;color:#fff;font-size:15px;font-weight:600}
+#sign-in:hover:not(:disabled){background:#943905}
+#sign-in:active:not(:disabled){background:#7b3005}
+#sign-in:disabled{cursor:default;background:#e8d5ca;color:#68472f}
+button:focus-visible{outline:2px solid #b54708;outline-offset:4px}
+#status{min-height:40px;margin:14px 0 0;color:#596779;font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+#status.error{color:#a3342a}
+.cancel{padding:6px 20px;background:transparent;color:#596779;min-height:36px}
+.cancel:hover:not(:disabled){background:#f4f6f8;color:#243041}
+.cancel:disabled{cursor:default}
+[hidden]{display:none!important}
+::selection{background:#fff2e8;color:#78320a}
+@media(max-height:420px){.login{padding:18px 0;width:min(300px,calc(100% - 40px))}.brand{width:42px;height:42px;margin-bottom:12px}h1{font-size:23px}.subtitle{font-size:12px;margin-top:4px}.controls{margin-top:22px}#status{font-size:12px;min-height:36px;margin-top:10px}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}

@@ -24,3 +24,11 @@ service-settings.json
 *.exe
 *.dll
 .DS_Store
+
+# Identity credentials and local QA state
+identity.json
+identity-qa.json
+identity-native-qa.json
+identity-web-qa.json
+*-client.json
+.impeccable/mocks/
